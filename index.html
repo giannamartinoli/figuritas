@@ -123,8 +123,9 @@
     font-family:'Saira',system-ui,sans-serif; color:#fff; flex:0 0 auto;
     box-shadow:0 18px 40px rgba(0,0,0,.22);
   }
-  .card .photo{position:absolute;inset:0;background-repeat:no-repeat;background-position:50% 38%;background-size:cover;cursor:grab;}
+  .card .photo{position:absolute;inset:0;overflow:hidden;cursor:grab;}
   .card .photo.dragging{cursor:grabbing;}
+  .card .photoImg{position:absolute;left:0;top:0;display:none;max-width:none;pointer-events:none;user-select:none;}
   .card .photo-empty{
     position:absolute;inset:0;display:flex;align-items:center;justify-content:center;
     font-family:'Inter';font-size:13px;font-weight:600;color:rgba(0,0,0,.4);
@@ -173,6 +174,9 @@
   /* big photo window — protagonista */
   .layout-a .photo-win{position:absolute;z-index:3;left:16px;right:16px;top:52px;height:268px;border-radius:10px;overflow:hidden;
     box-shadow:0 0 0 2px var(--f4), 0 0 0 4px var(--frame), 0 8px 18px rgba(0,0,0,.30);}
+  .layout-a .photo-win .photoBG{position:absolute;inset:0;z-index:0;}
+  .layout-a .photo-win .photoBG svg{width:100%;height:100%;display:block;}
+  .layout-a .photo-win .photo{z-index:1;}
   /* prominent flag badge — igual que la Clásica */
   .layout-a .flagBig{position:absolute;z-index:5;top:62px;right:26px;width:74px;height:50px;
     border-radius:7px;overflow:hidden;border:3px solid #fff;box-shadow:0 3px 9px rgba(0,0,0,.4);}
@@ -221,8 +225,8 @@
   .layout-b .stno .lbltxt{font-size:9px;font-weight:600;color:#cfcfcf;letter-spacing:.5px;text-transform:uppercase;}
   .layout-b .stno b{font-size:14px;font-weight:800;color:#fff;line-height:1;}
   .layout-b .photoB-region{position:relative;flex:1 1 auto;overflow:hidden;}
-  .layout-b .swirlB{position:absolute;inset:0;z-index:0;}
-  .layout-b .swirlB svg{width:100%;height:100%;display:block;}
+  .layout-b .photoBG{position:absolute;inset:0;z-index:0;}
+  .layout-b .photoBG svg{width:100%;height:100%;display:block;}
   .layout-b .photoB-region .photo{position:absolute;inset:0;
     background-position:50% 30%;z-index:1;}
   .layout-b .photoB-region .photo-empty{position:absolute;inset:0;z-index:1;}
@@ -246,6 +250,13 @@
 
   /* downloading state hides cursor affordances */
   .card.exporting .photo{cursor:default;}
+
+  /* background-removal toggle */
+  .bg-toggle{margin-top:10px;width:100%;border:1.5px solid var(--sg-orange);background:#fff;color:var(--sg-orange);
+    font-family:'Inter';font-weight:700;font-size:13px;border-radius:9px;padding:10px 12px;cursor:pointer;transition:.15s;}
+  .bg-toggle:hover{background:#fff6f0;}
+  .bg-toggle.on{background:var(--sg-orange);color:#fff;}
+  .bgstatus{margin-top:8px;font-family:'Inter';font-size:12px;color:var(--muted);line-height:1.4;}
 
   /* save modal */
   .dlmodal{position:fixed;inset:0;z-index:9999;background:rgba(0,0,0,.78);
@@ -284,15 +295,30 @@
       </div>
       <input type="file" id="file" accept="image/*" style="display:none">
       <div class="photo-tools" id="photoTools" style="display:none">
-        <span class="mini">Zoom</span>
-        <input type="range" id="zoom" min="1" max="3" step="0.01" value="1">
+        <span class="mini">Tamaño</span>
+        <input type="range" id="zoom" min="0.3" max="3" step="0.01" value="1">
+        <button class="linkbtn" id="fitBtn" type="button" style="margin-left:8px">Ajustar entero</button>
       </div>
       <div class="seg" id="modeSeg" style="display:none">
         <button data-mode="normal" class="on">Foto normal</button>
         <button data-mode="cutout">Recorte PNG (fondo transparente)</button>
       </div>
+      <button class="bg-toggle" id="bgRemove" style="display:none">✨ Quitar fondo a la foto</button>
+      <div id="bgStatus" class="bgstatus" style="display:none"></div>
+      <div class="field" id="bgFotoField" style="display:none;margin-top:10px">
+        <label>Fondo de la figurita</label>
+        <div class="chips" id="bgChips">
+          <button class="chip on" data-bg="studio"><span class="sw" style="background:radial-gradient(circle at 50% 38%,#fff,var(--sg-orange))"></span>Estudio</button>
+          <button class="chip" data-bg="rays"><span class="sw" style="background:conic-gradient(var(--sg-orange) 0 12deg,#fff 12deg 24deg,var(--sg-orange) 24deg 36deg,#fff 36deg 48deg)"></span>Rayos</button>
+          <button class="chip" data-bg="gradient"><span class="sw" style="background:linear-gradient(135deg,#fff,var(--sg-orange))"></span>Degradé</button>
+          <button class="chip" data-bg="bokeh"><span class="sw" style="background:radial-gradient(circle at 30% 30%,#fff 18%,transparent 19%),radial-gradient(circle at 70% 70%,#fff 14%,transparent 15%),var(--sg-orange)"></span>Bokeh</button>
+          <button class="chip" data-bg="liso"><span class="sw" style="background:var(--sg-orange);opacity:.55"></span>Liso</button>
+          <button class="chip" data-bg="original"><span class="sw" style="background:#d4d4d4"></span>Original</button>
+        </div>
+        <div class="hint">El fondo se ve detrás de la persona cuando quitás el fondo (o usás un recorte PNG). El color sigue la edición elegida.</div>
+      </div>
       <button class="linkbtn" id="recenter" style="display:none">Centrar foto</button>
-      <div class="hint">Arrastrá la foto dentro de la figurita para encuadrarla. Si tenés un recorte con fondo transparente, elegí “Recorte PNG” y va a flotar sobre el fondo.</div>
+      <div class="hint">Arrastrá la foto para encuadrarla y usá <b>Tamaño</b> para agrandar o achicar. Si la persona queda muy grande, bajá el tamaño o tocá “Ajustar entero” para que entre completa sobre el fondo.</div>
     </div>
 
     <div class="row2">
@@ -368,7 +394,7 @@
       <button class="btn btn-primary" id="download">⬇  Descargar figurita</button>
       <button class="btn btn-ghost" id="reset">Empezar de nuevo</button>
     </div>
-    <div class="note">Cada figurita se descarga en PNG de alta resolución (990×1500 px). Repetí el proceso para cada integrante del equipo.</div>
+    <div class="note">Cada figurita se descarga en PNG de alta resolución (1320×2000 px). Repetí el proceso para cada integrante del equipo.</div>
   </section>
 </div>
 
@@ -509,7 +535,8 @@ const state={
   layout:"b", theme:"oro", accent:"#EB6608", bg1:"#EB6608", bg2:"#7a3403",
   nombre:"", apellido:"", cargo:"", country:"AR", datos:"",
   coleccion:"", stickerno:"",
-  photo:null, imgW:0, imgH:0, posX:50, posY:30, zoom:1, mode:"normal"
+  photo:null, photoCut:null, cutW:0, cutH:0, imgW:0, imgH:0, posX:50, posY:30, zoom:1, mode:"normal",
+  removeBg:false, bgFoto:"studio"
 };
 
 const card=document.getElementById("card");
@@ -526,7 +553,7 @@ function buildA(){
     +'<span class="coleccion"></span>'
     +'<div class="emb">'+trophy("#fff6d2")+'<span class="emblem-num">26</span></div>'
   +'</div>'
-  +'<div class="photo-win"><div class="photo"></div><div class="photo-empty">Subí una foto<br>o un escudo</div></div>'
+  +'<div class="photo-win"><div class="photoBG"></div><div class="photo"><img class="photoImg" alt=""></div><div class="photo-empty">Subí una foto<br>o un escudo</div></div>'
   +'<div class="flagBig"><div data-flag></div><div class="cap"><span class="paiscap"></span></div></div>'
   +'<div class="plateA">'
     +'<div class="nameA"><span class="nombre"></span> <span class="apellido"></span></div>'
@@ -537,12 +564,6 @@ function buildA(){
   +'<div class="sgbadge"><img class="sg" src="'+SGW+'"><span>ÁLBUM SOFTGUARD \'26</span></div>';
 }
 function buildB(){
-  const acc=state.accent, accSoft=mix(state.accent,"#ffffff",.72);
-  const sw='<svg viewBox="0 0 60 80" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">'
-    +'<rect width="60" height="80" fill="'+accSoft+'"/>'
-    +'<path d="M-5 80 Q30 30 65 80 Z" fill="'+acc+'" opacity=".55"/>'
-    +'<circle cx="48" cy="20" r="26" fill="'+acc+'" opacity=".35"/>'
-    +'<circle cx="10" cy="14" r="16" fill="#fff" opacity=".25"/></svg>';
   return ''
   +'<div class="stickerB">'
     +'<div class="topB">'
@@ -550,8 +571,8 @@ function buildB(){
       +'<div class="stno"><span class="lbltxt">N.º</span><b class="stickerno"></b></div>'
     +'</div>'
     +'<div class="photoB-region">'
-      +'<div class="swirlB">'+sw+'</div>'
-      +'<div class="photo"></div><div class="photo-empty">Subí una foto<br>de tu compañero/a</div>'
+      +'<div class="photoBG"></div>'
+      +'<div class="photo"><img class="photoImg" alt=""></div><div class="photo-empty">Subí una foto<br>de tu compañero/a</div>'
       +'<div class="flagBig"><div data-flag></div><div class="cap"><span class="paiscap"></span></div></div>'
     +'</div>'
     +'<div class="infoB"><div class="infoB-text">'
@@ -573,6 +594,7 @@ function renderLayout(){
   }else{ card.style.removeProperty("--accent"); card.style.removeProperty("--bg1"); card.style.removeProperty("--bg2"); }
   bindPhoto();
   applyContent();
+  applyBG();
   requestAnimationFrame(applyPhoto);
 }
 
@@ -605,18 +627,33 @@ function applyContent(){
 /* ============ Photo ============ */
 function applyPhoto(){
   const el=card.querySelector(".photo"); if(!el) return;
+  const img=el.querySelector(".photoImg");
   const empty=card.querySelector(".photo-empty");
-  if(!state.photo){ el.style.backgroundImage="none"; if(empty) empty.style.display="flex"; return; }
+  const useCut = state.removeBg && state.photoCut;
+  const src = useCut ? state.photoCut : state.photo;
+  if(!src){ if(img){img.removeAttribute("src");img.style.display="none";} if(empty) empty.style.display="flex"; return; }
   if(empty) empty.style.display="none";
-  el.style.backgroundImage="url('"+state.photo+"')";
-  el.style.backgroundColor= state.mode==="cutout" ? "transparent" : "transparent";
-  const cw=el.clientWidth, chh=el.clientHeight, iw=state.imgW, ih=state.imgH;
-  if(iw&&ih&&cw&&chh){
-    const base= state.mode==="cutout" ? Math.min(cw/iw, chh/ih) : Math.max(cw/iw, chh/ih);
+  if(img){ img.style.display="block"; if(img.getAttribute("src")!==src) img.setAttribute("src",src); }
+  const isCut = useCut || state.mode==="cutout";
+  const cw=el.clientWidth, chh=el.clientHeight;
+  const iw = useCut ? state.cutW : state.imgW;
+  const ih = useCut ? state.cutH : state.imgH;
+  if(img && iw&&ih&&cw&&chh){
+    const base= isCut ? Math.min(cw/iw, chh/ih) : Math.max(cw/iw, chh/ih);
     const s=base*state.zoom;
-    el.style.backgroundSize=(iw*s)+"px "+(ih*s)+"px";
-  }else{ el.style.backgroundSize= state.mode==="cutout" ? "contain":"cover"; }
-  el.style.backgroundPosition=state.posX+"% "+state.posY+"%";
+    const w=iw*s, h=ih*s;
+    img.style.width=w+"px"; img.style.height=h+"px";
+    img.style.left=((cw-w)*(state.posX/100))+"px";
+    img.style.top=((chh-h)*(state.posY/100))+"px";
+  }
+}
+function applyBG(){
+  const bg=card.querySelector(".photoBG"); if(!bg) return;
+  const color = state.layout==="b" ? state.accent : themeColor();
+  bg.innerHTML = bgSVG(state.bgFoto, color);
+}
+function themeColor(){
+  return ({oro:"#c8a24a",plata:"#9aa3ad",naranja:"#EB6608",esmeralda:"#2f8e72"})[state.theme] || "#c8a24a";
 }
 function bindPhoto(){
   const el=card.querySelector(".photo"); if(!el) return;
@@ -645,6 +682,165 @@ function mix(hex,hex2,r){
 }
 function h2r(h){h=h.replace("#","");if(h.length===3)h=h.split("").map(x=>x+x).join("");
   return {r:parseInt(h.slice(0,2),16),g:parseInt(h.slice(2,4),16),b:parseInt(h.slice(4,6),16)};}
+
+/* ============ Fondos lindos para la foto ============ */
+function bgSVG(style, color){
+  const lighter = mix(color,"#ffffff",.84);
+  const light   = mix(color,"#ffffff",.60);
+  const deep    = mix(color,"#000000",.10);
+  const head='<svg viewBox="0 0 100 140" preserveAspectRatio="xMidYMid slice" xmlns="http://www.w3.org/2000/svg">';
+  if(style==="original") return "";
+  if(style==="liso"){
+    return head+'<rect width="100" height="140" fill="'+light+'"/></svg>';
+  }
+  if(style==="gradient"){
+    return head+'<defs><linearGradient id="bgg" x1="0" y1="0" x2="1" y2="1">'
+      +'<stop offset="0" stop-color="'+lighter+'"/><stop offset="1" stop-color="'+deep+'"/></linearGradient></defs>'
+      +'<rect width="100" height="140" fill="url(#bgg)"/></svg>';
+  }
+  if(style==="studio"){
+    return head+'<defs><radialGradient id="bgr" cx="50%" cy="36%" r="78%">'
+      +'<stop offset="0" stop-color="'+lighter+'"/><stop offset="0.55" stop-color="'+light+'"/><stop offset="1" stop-color="'+deep+'"/></radialGradient></defs>'
+      +'<rect width="100" height="140" fill="url(#bgr)"/></svg>';
+  }
+  if(style==="rays"){
+    let w=head+'<rect width="100" height="140" fill="'+light+'"/><g transform="translate(50,50)">';
+    const N=24, R=170;
+    for(let i=0;i<N;i++){
+      const a0=(i/N)*2*Math.PI, a1=((i+0.5)/N)*2*Math.PI;
+      const x0=(Math.cos(a0)*R).toFixed(1), y0=(Math.sin(a0)*R).toFixed(1);
+      const x1=(Math.cos(a1)*R).toFixed(1), y1=(Math.sin(a1)*R).toFixed(1);
+      w+='<path d="M0 0 L'+x0+' '+y0+' L'+x1+' '+y1+' Z" fill="'+lighter+'" opacity="0.5"/>';
+    }
+    return w+'</g></svg>';
+  }
+  if(style==="bokeh"){
+    let w=head+'<defs><linearGradient id="bgb" x1="0" y1="0" x2="0" y2="1">'
+      +'<stop offset="0" stop-color="'+light+'"/><stop offset="1" stop-color="'+deep+'"/></linearGradient></defs>'
+      +'<rect width="100" height="140" fill="url(#bgb)"/>';
+    [[16,22,11],[80,32,17],[28,72,9],[66,94,13],[10,108,8],[88,120,10],[48,52,6]].forEach(d=>{
+      w+='<circle cx="'+d[0]+'" cy="'+d[1]+'" r="'+d[2]+'" fill="'+lighter+'" opacity="0.5"/>';
+    });
+    return w+'</svg>';
+  }
+  return "";
+}
+
+/* ============ Quitar fondo (IA en el navegador) ============ */
+let _seg=null, _segLoading=null;
+function loadScript(src){return new Promise((res,rej)=>{
+  const s=document.createElement("script");s.src=src;
+  s.onload=()=>res();s.onerror=()=>rej(new Error("No se pudo cargar "+src));
+  document.head.appendChild(s);});}
+function loadImg(src){return new Promise((res,rej)=>{const i=new Image();i.onload=()=>res(i);i.onerror=rej;i.src=src;});}
+async function getSegmenter(){
+  if(_seg) return _seg;
+  if(!_segLoading){
+    _segLoading=(async()=>{
+      const BASE="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation@0.1/";
+      await loadScript(BASE+"selfie_segmentation.js");
+      const S=window.SelfieSegmentation;
+      if(!S) throw new Error("motor no disponible");
+      const seg=new S({locateFile:f=>BASE+f});
+      seg.setOptions({modelSelection:1});
+      await seg.initialize();
+      _seg=seg; return seg;
+    })().catch(e=>{_segLoading=null;throw e;});
+  }
+  return _segLoading;
+}
+function setBgStatus(msg,isErr){
+  const el=document.getElementById("bgStatus"); if(!el) return;
+  el.textContent=msg||""; el.style.display=msg?"block":"none";
+  el.style.color=isErr?"#c0392b":"var(--muted)";
+}
+// recorte de alta calidad (img.ly) — el modelo lo baja su propio CDN
+let _imgly=null;
+async function getImgly(){
+  if(_imgly) return _imgly;
+  _imgly=await import("https://cdn.jsdelivr.net/npm/@imgly/background-removal@1.7.0/dist/index.mjs");
+  return _imgly;
+}
+// recorta al contorno de la persona (saca el aire transparente) y limita resolución
+function cropToContent(img){
+  let w=img.naturalWidth||img.width, h=img.naturalHeight||img.height;
+  const MAX=1400, sc=Math.min(1,MAX/Math.max(w,h)); w=Math.round(w*sc); h=Math.round(h*sc);
+  const c=document.createElement("canvas"); c.width=w; c.height=h;
+  const ctx=c.getContext("2d"); ctx.drawImage(img,0,0,w,h);
+  let px; try{ px=ctx.getImageData(0,0,w,h).data; }catch(e){ return {dataURL:c.toDataURL("image/png"),w,h}; }
+  let minx=w,miny=h,maxx=0,maxy=0,found=false;
+  for(let y=0;y<h;y++){ const row=y*w*4; for(let x=0;x<w;x++){ if(px[row+x*4+3]>28){ found=true; if(x<minx)minx=x;if(x>maxx)maxx=x;if(y<miny)miny=y;if(y>maxy)maxy=y; } } }
+  if(!found) return {dataURL:c.toDataURL("image/png"),w,h};
+  const bw=maxx-minx+1, bh=maxy-miny+1;
+  const padX=Math.round(bw*0.07), padY=Math.round(bh*0.05);
+  minx=Math.max(0,minx-padX); miny=Math.max(0,miny-padY);
+  maxx=Math.min(w-1,maxx+padX); maxy=Math.min(h-1,maxy+padY);
+  const cw=maxx-minx+1, chh=maxy-miny+1;
+  const oc=document.createElement("canvas"); oc.width=cw; oc.height=chh;
+  oc.getContext("2d").drawImage(c, minx,miny,cw,chh, 0,0,cw,chh);
+  return {dataURL:oc.toDataURL("image/png"), w:cw, h:chh};
+}
+async function cutoutImgly(src){
+  const mod=await getImgly();
+  const blob=await mod.removeBackground(src,{output:{format:"image/png"}});
+  const url=URL.createObjectURL(blob);
+  const img=await loadImg(url);
+  const r=cropToContent(img); try{URL.revokeObjectURL(url);}catch(e){}
+  return r;
+}
+// respaldo liviano (MediaPipe) con bordes suavizados
+async function cutoutMediaPipe(src){
+  const seg=await getSegmenter();
+  const img=await loadImg(src);
+  const MAX=1100; let w=img.naturalWidth,h=img.naturalHeight;
+  const sc=Math.min(1,MAX/Math.max(w,h)); w=Math.round(w*sc); h=Math.round(h*sc);
+  const work=document.createElement("canvas"); work.width=w; work.height=h; work.getContext("2d").drawImage(img,0,0,w,h);
+  const result=await new Promise((resolve,reject)=>{
+    let done=false;
+    seg.onResults(res=>{ if(done)return; done=true;
+      try{
+        const mc=document.createElement("canvas"); mc.width=w; mc.height=h;
+        const mx=mc.getContext("2d"); mx.imageSmoothingEnabled=true; mx.imageSmoothingQuality="high";
+        mx.filter="blur("+Math.max(1.2,Math.min(w,h)/170)+"px)"; mx.drawImage(res.segmentationMask,0,0,w,h); mx.filter="none";
+        const md=mx.getImageData(0,0,w,h).data;
+        const ic=document.createElement("canvas"); ic.width=w; ic.height=h;
+        const ix=ic.getContext("2d"); ix.drawImage(work,0,0,w,h);
+        const id=ix.getImageData(0,0,w,h); const px=id.data;
+        const lo=90,hi=205;
+        for(let i=0;i<px.length;i+=4){ const m=md[i]; px[i+3]= m<=lo?0 : m>=hi?255 : Math.round((m-lo)/(hi-lo)*255); }
+        ix.putImageData(id,0,0);
+        const im=new Image(); im.onload=()=>{ try{ resolve(cropToContent(im)); }catch(e){ reject(e); } }; im.onerror=reject; im.src=ic.toDataURL("image/png");
+      }catch(e){reject(e);}
+    });
+    seg.send({image:work}).catch(reject);
+    setTimeout(()=>{if(!done){done=true;reject(new Error("timeout"));}},25000);
+  });
+  return result;
+}
+async function removeBgFromPhoto(){
+  if(!state.photo){ return; }
+  state.processing=true;
+  setBgStatus("Quitando fondo… la primera vez baja un modelo de IA (puede tardar unos segundos).");
+  let r=null;
+  try{ r=await cutoutImgly(state.photo); }
+  catch(e1){
+    setBgStatus("Afinando el recorte…");
+    try{ r=await cutoutMediaPipe(state.photo); }catch(e2){ r=null; }
+  }
+  if(r){
+    state.photoCut=r.dataURL; state.cutW=r.w; state.cutH=r.h;
+    state.posX=50; state.posY=50;
+    setBgStatus(""); applyPhoto();
+  }else{
+    state.removeBg=false; syncBgToggle();
+    setBgStatus("No se pudo quitar el fondo automáticamente (necesita internet). Probá de nuevo, o subí un PNG sin fondo y elegí “Recorte PNG”.", true);
+  }
+  state.processing=false;
+}
+function syncBgToggle(){
+  const t=document.getElementById("bgRemove");
+  if(t){ t.classList.toggle("on", !!state.removeBg); t.textContent = state.removeBg ? "✨ Fondo quitado (la persona resalta)" : "✨ Quitar fondo a la foto"; }
+}
 
 /* ============ Populate country select ============ */
 const sel=document.getElementById("pais");
@@ -699,7 +895,7 @@ function loadPhoto(f){
   reader.onload=()=>{
     const img=new Image();
     img.onload=()=>{
-      state.photo=reader.result; state.imgW=img.naturalWidth; state.imgH=img.naturalHeight;
+      state.photo=reader.result; state.photoCut=null; state.cutW=0; state.cutH=0; state.imgW=img.naturalWidth; state.imgH=img.naturalHeight;
       state.posX=50; state.posY=state.layout==="a"?35:30; state.zoom=1;
       document.getElementById("zoom").value=1;
       document.getElementById("thumb").src=reader.result;
@@ -708,24 +904,69 @@ function loadPhoto(f){
       document.getElementById("drop").classList.add("has");
       document.getElementById("photoTools").style.display="flex";
       document.getElementById("modeSeg").style.display="flex";
+      document.getElementById("bgRemove").style.display="block";
+      document.getElementById("bgFotoField").style.display="block";
       document.getElementById("recenter").style.display="inline";
+      setBgStatus("");
       applyPhoto();
+      if(state.removeBg) removeBgFromPhoto();
     };
     img.src=reader.result;
   };
   reader.readAsDataURL(f);
 }
 on("zoom","input",e=>{state.zoom=parseFloat(e.target.value);applyPhoto();});
+function fitWhole(){
+  const el=card.querySelector(".photo"); if(!el) return;
+  const useCut = state.removeBg && state.photoCut;
+  const iw = useCut ? state.cutW : state.imgW;
+  const ih = useCut ? state.cutH : state.imgH;
+  const cw=el.clientWidth, chh=el.clientHeight;
+  if(!(iw&&ih&&cw&&chh)) return;
+  const isCut = useCut || state.mode==="cutout";
+  let z=1;
+  if(!isCut){
+    const cover=Math.max(cw/iw,chh/ih), contain=Math.min(cw/iw,chh/ih);
+    z=contain/cover;
+  }
+  z=Math.max(0.3,Math.min(3,z));
+  state.zoom=z; state.posX=50; state.posY=50;
+  const zi=document.getElementById("zoom"); if(zi) zi.value=z;
+  applyPhoto();
+}
+on("fitBtn","click",fitWhole);
 document.querySelectorAll("#modeSeg button").forEach(b=>b.addEventListener("click",()=>{
   document.querySelectorAll("#modeSeg button").forEach(x=>x.classList.remove("on"));
   b.classList.add("on"); state.mode=b.dataset.mode; applyPhoto();
 }));
 on("recenter","click",()=>{state.posX=50;state.posY=state.layout==="a"?35:30;state.zoom=1;document.getElementById("zoom").value=1;applyPhoto();});
 
+// quitar fondo (IA)
+on("bgRemove","click",()=>{
+  if(state.processing) return;
+  state.removeBg=!state.removeBg;
+  syncBgToggle();
+  if(state.removeBg){
+    if(state.bgFoto==="original"){ state.bgFoto="studio"; selectBgChip("studio"); applyBG(); }
+    if(state.photoCut){ applyPhoto(); } else { removeBgFromPhoto(); }
+  }else{
+    setBgStatus("");
+    applyPhoto();
+  }
+});
+// fondos
+function selectBgChip(v){
+  document.querySelectorAll("#bgChips .chip").forEach(x=>x.classList.toggle("on", x.dataset.bg===v));
+}
+document.querySelectorAll("#bgChips .chip").forEach(b=>b.addEventListener("click",()=>{
+  selectBgChip(b.dataset.bg); state.bgFoto=b.dataset.bg; applyBG();
+}));
+
 // reset
 on("reset","click",()=>{
   Object.assign(state,{nombre:"",apellido:"",cargo:"",datos:"",coleccion:"",stickerno:"",country:"AR",
-    photo:null,imgW:0,imgH:0,posX:50,posY:state.layout==="a"?35:30,zoom:1,mode:"normal"});
+    photo:null,photoCut:null,cutW:0,cutH:0,imgW:0,imgH:0,posX:50,posY:state.layout==="a"?35:30,zoom:1,mode:"normal",
+    removeBg:false});
   ["nombre","apellido","cargo","datos","coleccion","stickerno"].forEach(id=>document.getElementById(id).value="");
   sel.value="AR";
   document.getElementById("thumb").style.display="none";
@@ -733,7 +974,11 @@ on("reset","click",()=>{
   document.getElementById("drop").classList.remove("has");
   document.getElementById("photoTools").style.display="none";
   document.getElementById("modeSeg").style.display="none";
+  document.getElementById("bgRemove").style.display="none";
+  document.getElementById("bgFotoField").style.display="none";
   document.getElementById("recenter").style.display="none";
+  setBgStatus("");
+  syncBgToggle();
   document.querySelectorAll("#modeSeg button").forEach((x,i)=>x.classList.toggle("on",i===0));
   renderLayout();
 });
@@ -750,10 +995,11 @@ on("download","click",async()=>{
   btn.disabled=true; btn.textContent="Generando…";
   applyPhoto();
   try{ await document.fonts.ready; }catch(e){}
+  try{ const im=card.querySelector(".photoImg"); if(im&&im.getAttribute("src")&&im.decode) await im.decode(); }catch(e){}
   card.classList.add("exporting");
   try{
-    const canvas=await html2canvas(card,{scale:3,backgroundColor:null,useCORS:true,logging:false,
-      width:330,height:500,windowWidth:330,windowHeight:500});
+    const canvas=await html2canvas(card,{scale:4,backgroundColor:null,useCORS:true,logging:false,
+      imageTimeout:0,width:330,height:500,windowWidth:330,windowHeight:500});
     const name=((state.nombre||"")+"-"+(state.apellido||"figurita")).trim().replace(/\s+/g,"-").toLowerCase()||"figurita";
     const fname="figurita-"+name+".png";
 
