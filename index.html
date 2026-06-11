@@ -249,6 +249,34 @@
   .layout-b .infoB-trophy svg{width:25px;height:auto;}
   .layout-b .vline{width:1px;background:#d2d4d9;}
 
+  /* ===== Producto / Objeto ===== */
+  .areaTag{position:absolute;z-index:6;top:10px;left:10px;background:rgba(0,0,0,.62);color:#fff;
+    font-family:'Saira Condensed','Saira';font-weight:700;font-size:9.5px;letter-spacing:.6px;text-transform:uppercase;
+    padding:4px 9px;border-radius:5px;display:none;max-width:60%;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  /* Clásica producto */
+  .layout-b .infoB-prod{align-items:center;}
+  .layout-b .prodText{flex:1;min-width:0;text-align:left;}
+  .layout-b .prodTitle{font-family:'Saira Condensed','Saira';font-weight:800;font-size:21px;line-height:1.04;
+    color:var(--sg-black);text-transform:uppercase;letter-spacing:.4px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .layout-b .prodSub{font-family:'Inter';font-weight:600;font-size:12px;color:#52555c;line-height:1.3;margin-top:3px;
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  /* Dorada producto */
+  .layout-a .plateA-prod{justify-content:center;}
+  .layout-a .titA{font-family:'Saira Condensed','Saira';font-weight:800;font-size:26px;line-height:1.02;color:#fff;
+    text-transform:uppercase;letter-spacing:.6px;text-shadow:0 2px 3px rgba(0,0,0,.5);
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+  .layout-a .subA{font-family:'Inter';font-weight:500;font-size:12.5px;color:#fff;opacity:.92;line-height:1.3;
+    text-shadow:0 1px 2px rgba(0,0,0,.5);
+    display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden;}
+
+  /* ===== Edición Mundial (colores del mundial) ===== */
+  .card.layout-b.ed-mundial{
+    background:linear-gradient(135deg,#00b3c4 0%,#1d62d8 30%,#7a2ec9 55%,#e0218a 78%,#ff7a00 100%);
+  }
+  .card.layout-b.ed-mundial .figus{background:#111;}
+  .card.layout-b.ed-mundial .infoB,.card.layout-b.ed-mundial .infoB-prod{border-top-color:#e0218a;}
+
   /* downloading state hides cursor affordances */
   .card.exporting .photo{cursor:default;}
 
@@ -322,23 +350,53 @@
       <div class="hint">Arrastrá la foto para encuadrarla y usá <b>Tamaño</b> para agrandar o achicar. Si la persona queda muy grande, bajá el tamaño o tocá “Ajustar entero” para que entre completa sobre el fondo.</div>
     </div>
 
-    <div class="row2">
+    <div class="field">
+      <label>Tipo de figurita</label>
+      <div class="style-chips">
+        <button class="style-chip on" data-tipo="persona">
+          <div class="nm">Persona</div>
+          <div class="ds">Nombre, cargo, país y datos</div>
+        </button>
+        <button class="style-chip" data-tipo="producto">
+          <div class="nm">Producto / Objeto</div>
+          <div class="ds">Pelota, logos, módulos, merch (sin nombre ni país)</div>
+        </button>
+      </div>
+    </div>
+
+    <div class="field productoField" style="display:none">
+      <label>Título</label>
+      <input type="text" id="titulo" placeholder="Ej.: LA TRIONDA · SMARTPANICS · VIGICONTROL" maxlength="30">
+      <div class="hint">El nombre del objeto/figurita (pelota, app, módulo, merch…).</div>
+    </div>
+    <div class="field productoField" style="display:none">
+      <label>Subtítulo (opcional)</label>
+      <input type="text" id="subtitulo" placeholder="Ej.: Pelota oficial · App de botón de pánico · Módulo de Monitoreo" maxlength="48">
+    </div>
+
+    <div class="field">
+      <label>Área / Equipo (opcional)</label>
+      <input type="text" id="area" placeholder="Ej.: Comercial · Marketing · Soporte · OR México" maxlength="22">
+      <div class="hint">Aparece como etiqueta en la figurita para armar el álbum por equipos.</div>
+    </div>
+
+    <div class="row2 personaField">
       <div class="field"><label>Nombre</label><input type="text" id="nombre" placeholder="Daniel" maxlength="22"></div>
       <div class="field"><label>Apellido</label><input type="text" id="apellido" placeholder="Banda" maxlength="22"></div>
     </div>
 
-    <div class="field">
+    <div class="field personaField">
       <label>Cargo o área</label>
       <input type="text" id="cargo" placeholder="CEO de SoftGuard" maxlength="34">
       <div class="hint">Ej.: “Diseño Gráfico”, “Marketing”, “Oficina Regional México”.</div>
     </div>
 
-    <div class="field">
+    <div class="field personaField">
       <label>País</label>
       <select id="pais"></select>
     </div>
 
-    <div class="field">
+    <div class="field personaField">
       <label>Datos (opcional)</label>
       <input type="text" id="datos" placeholder="Ej.: 9 años en SoftGuard · ☕ x4 por día" maxlength="44">
       <div class="hint">La línea de stats tipo figurita. Dejala vacía si no querés que aparezca.</div>
@@ -376,6 +434,7 @@
         <button class="chip" data-accent="#1D12C0" data-bg1="#1D12C0" data-bg2="#0a0640"><span class="sw" style="background:linear-gradient(157deg,#1D12C0,#0a0640)"></span>Azul eléctrico</button>
         <button class="chip" data-accent="#EB6608" data-bg1="#EB6608" data-bg2="#1D12C0"><span class="sw" style="background:linear-gradient(157deg,#EB6608,#1D12C0)"></span>Fusión</button>
         <button class="chip" data-accent="#EB6608" data-bg1="#6e6e6e" data-bg2="#2b2b2b"><span class="sw" style="background:linear-gradient(157deg,#6e6e6e,#2b2b2b)"></span>Acero</button>
+        <button class="chip" data-edition="mundial" data-accent="#e0218a" data-bg1="#1d62d8" data-bg2="#e0218a"><span class="sw" style="background:linear-gradient(135deg,#00b3c4,#1d62d8,#7a2ec9,#e0218a,#ff7a00)"></span>Mundial 26</button>
       </div>
     </div>
 
@@ -533,7 +592,8 @@ function trophy(fill){
 
 /* ============ State ============ */
 const state={
-  layout:"b", theme:"oro", accent:"#EB6608", bg1:"#EB6608", bg2:"#7a3403",
+  layout:"b", theme:"oro", accent:"#EB6608", bg1:"#EB6608", bg2:"#7a3403", edition:"naranja",
+  tipo:"persona", titulo:"", subtitulo:"", area:"",
   nombre:"", apellido:"", cargo:"", country:"AR", datos:"",
   coleccion:"", stickerno:"",
   photo:null, photoCut:null, cutW:0, cutH:0, imgW:0, imgH:0, posX:50, posY:30, zoom:1, mode:"normal",
@@ -545,7 +605,23 @@ const card=document.getElementById("card");
 function findCountry(){return COUNTRIES.find(x=>x.c===state.country)||COUNTRIES[0];}
 
 /* ============ Build layouts ============ */
+function areaTag(){ return '<div class="areaTag" data-area></div>'; }
+function flagBigEl(){ return '<div class="flagBig"><div data-flag></div><div class="cap"><span class="paiscap"></span></div></div>'; }
+
 function buildA(){
+  const prod = state.tipo==="producto";
+  const plate = prod
+    ? '<div class="plateA plateA-prod">'
+        +'<div class="titA"><span class="titulo"></span></div>'
+        +'<div class="divA"></div>'
+        +'<div class="subA"><span class="subtitulo"></span></div>'
+      +'</div>'
+    : '<div class="plateA">'
+        +'<div class="nameA"><span class="nombre"></span> <span class="apellido"></span></div>'
+        +'<div class="divA"></div>'
+        +'<div class="cargoA"><span class="cargo"></span></div>'
+        +'<div class="datos"></div>'
+      +'</div>';
   return ''
   +'<div class="foil-tex"></div>'
   +'<div class="wmA">26</div>'
@@ -554,17 +630,24 @@ function buildA(){
     +'<span class="coleccion"></span>'
     +'<div class="emb">'+trophy("#fff6d2")+'<span class="emblem-num">26</span></div>'
   +'</div>'
-  +'<div class="photo-win"><div class="photoBG"></div><div class="photo"><img class="photoImg" alt=""></div><div class="photo-empty">Subí una foto<br>o un escudo</div></div>'
-  +'<div class="flagBig"><div data-flag></div><div class="cap"><span class="paiscap"></span></div></div>'
-  +'<div class="plateA">'
-    +'<div class="nameA"><span class="nombre"></span> <span class="apellido"></span></div>'
-    +'<div class="divA"></div>'
-    +'<div class="cargoA"><span class="cargo"></span></div>'
-    +'<div class="datos"></div>'
-  +'</div>'
+  +'<div class="photo-win"><div class="photoBG"></div><div class="photo"><img class="photoImg" alt=""></div><div class="photo-empty">'+(prod?'Subí la imagen<br>(pelota, logo, producto…)':'Subí una foto<br>o un escudo')+'</div>'+areaTag()+'</div>'
+  +(prod?'':flagBigEl())
+  +plate
   +'<div class="sgbadge"><img class="sg" src="'+SGW+'"><span>ÁLBUM SOFTGUARD \'26</span></div>';
 }
 function buildB(){
+  const prod = state.tipo==="producto";
+  const info = prod
+    ? '<div class="infoB infoB-prod"><div class="prodText">'
+        +'<div class="prodTitle"><span class="titulo"></span></div>'
+        +'<div class="prodSub"><span class="subtitulo"></span></div>'
+      +'</div><div class="vline"></div><div class="infoB-trophy"><div class="tcircle">'+trophy("#fff")+'</div></div></div>'
+    : '<div class="infoB"><div class="infoB-text">'
+        +'<div><span class="lbl">NOMBRE:</span> <span class="nombreFull"></span></div>'
+        +'<div class="cargoRow"><span class="lbl">CARGO:</span> <span class="cargo"></span></div>'
+        +'<div><span class="lbl">PAÍS:</span> <span class="pais"></span></div>'
+        +'<div class="datosline"><span class="lbl">DATOS:</span> <span class="datos"></span></div>'
+      +'</div><div class="vline"></div><div class="infoB-trophy"><div class="tcircle">'+trophy("#fff")+'</div></div></div>';
   return ''
   +'<div class="stickerB">'
     +'<div class="topB">'
@@ -573,20 +656,17 @@ function buildB(){
     +'</div>'
     +'<div class="photoB-region">'
       +'<div class="photoBG"></div>'
-      +'<div class="photo"><img class="photoImg" alt=""></div><div class="photo-empty">Subí una foto<br>de tu compañero/a</div>'
-      +'<div class="flagBig"><div data-flag></div><div class="cap"><span class="paiscap"></span></div></div>'
+      +'<div class="photo"><img class="photoImg" alt=""></div><div class="photo-empty">'+(prod?'Subí la imagen<br>(pelota, logo, producto…)':'Subí una foto<br>de tu compañero/a')+'</div>'
+      +areaTag()
+      +(prod?'':flagBigEl())
     +'</div>'
-    +'<div class="infoB"><div class="infoB-text">'
-      +'<div><span class="lbl">NOMBRE:</span> <span class="nombreFull"></span></div>'
-      +'<div class="cargoRow"><span class="lbl">CARGO:</span> <span class="cargo"></span></div>'
-      +'<div><span class="lbl">PAÍS:</span> <span class="pais"></span></div>'
-      +'<div class="datosline"><span class="lbl">DATOS:</span> <span class="datos"></span></div>'
-    +'</div><div class="vline"></div><div class="infoB-trophy"><div class="tcircle">'+trophy("#fff")+'</div></div></div>'
+    +info
   +'</div>';
 }
 
 function renderLayout(){
-  card.className="card layout-"+state.layout+(state.layout==="a"?(" theme-"+state.theme):"");
+  card.className="card layout-"+state.layout+(state.layout==="a"?(" theme-"+state.theme):"")
+    +(state.layout==="b"&&state.edition==="mundial"?" ed-mundial":"");
   card.innerHTML = state.layout==="a"?buildA():buildB();
   if(state.layout==="b"){
     card.style.setProperty("--accent",state.accent);
@@ -603,8 +683,25 @@ function setTxt(sel,val){const e=card.querySelector(sel); if(e) e.textContent=va
 function applyContent(){
   const ct=findCountry();
   const nom=state.nombre.trim(), ape=state.apellido.trim();
-  // flags
-  card.querySelectorAll("[data-flag]").forEach(el=>el.innerHTML=flagSVG(ct.f));
+  const prod=state.tipo==="producto";
+  // flags (solo persona)
+  if(!prod) card.querySelectorAll("[data-flag]").forEach(el=>el.innerHTML=flagSVG(ct.f));
+  // tag de área/equipo
+  const at=card.querySelector("[data-area]");
+  if(at){ const a=state.area.trim(); at.textContent=a.toUpperCase(); at.style.display=a?"inline-block":"none"; }
+  // número de figurita (ambas caras lo tienen visible en B; en A no, pero seteamos si existe)
+  setTxt(".stickerno", state.stickerno.trim()||"123");
+
+  if(prod){
+    setTxt(".titulo", state.titulo.trim()|| (state.layout==="a"?"TÍTULO":"Título"));
+    const sub=card.querySelector(".subtitulo");
+    if(sub){ sub.textContent=state.subtitulo.trim(); }
+    const subWrap = card.querySelector(state.layout==="a"?".subA":".prodSub");
+    if(subWrap){ subWrap.style.display=state.subtitulo.trim()?"block":"none"; }
+    setTxt(".coleccion", (state.coleccion.trim()||"COLECCIÓN MUNDIAL").toUpperCase());
+    return;
+  }
+
   if(state.layout==="a"){
     setTxt(".nombre", nom||"Nombre");
     setTxt(".apellido", ape||"Apellido");
@@ -619,7 +716,6 @@ function applyContent(){
     setTxt(".cargo", state.cargo.trim()||"Cargo o área");
     setTxt(".pais", ct.n);
     setTxt(".paiscap", ct.n);
-    setTxt(".stickerno", state.stickerno.trim()||"123");
     const dl=card.querySelector(".datosline");
     if(dl){ card.querySelector(".datosline .datos").textContent=state.datos.trim(); dl.style.display=state.datos.trim()?"block":"none"; }
   }
@@ -850,14 +946,24 @@ sel.value="AR";
 
 /* ============ Wire inputs ============ */
 function on(id,ev,fn){document.getElementById(id).addEventListener(ev,fn);}
-["nombre","apellido","cargo","datos","coleccion","stickerno"].forEach(id=>{
+["nombre","apellido","cargo","datos","coleccion","stickerno","titulo","subtitulo","area"].forEach(id=>{
   on(id,"input",e=>{state[id]=e.target.value;applyContent();});
 });
 on("pais","change",e=>{state.country=e.target.value;applyContent();});
 
-// style
-document.querySelectorAll(".style-chip").forEach(b=>b.addEventListener("click",()=>{
-  document.querySelectorAll(".style-chip").forEach(x=>x.classList.remove("on"));
+// tipo de figurita (persona / producto)
+document.querySelectorAll(".style-chip[data-tipo]").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".style-chip[data-tipo]").forEach(x=>x.classList.remove("on"));
+  b.classList.add("on"); state.tipo=b.dataset.tipo;
+  const prod = state.tipo==="producto";
+  document.querySelectorAll(".personaField").forEach(el=>el.style.display=prod?"none":"");
+  document.querySelectorAll(".productoField").forEach(el=>el.style.display=prod?"":"none");
+  renderLayout();
+}));
+
+// style (layout)
+document.querySelectorAll(".style-chip[data-layout]").forEach(b=>b.addEventListener("click",()=>{
+  document.querySelectorAll(".style-chip[data-layout]").forEach(x=>x.classList.remove("on"));
   b.classList.add("on"); state.layout=b.dataset.layout;
   document.getElementById("themeField").style.display = state.layout==="a"?"block":"none";
   document.getElementById("accentField").style.display = state.layout==="b"?"block":"none";
@@ -876,6 +982,7 @@ document.querySelectorAll("#accentChips .chip").forEach(b=>b.addEventListener("c
   state.accent=b.dataset.accent;
   state.bg1=b.dataset.bg1||state.accent;
   state.bg2=b.dataset.bg2||state.accent;
+  state.edition=b.dataset.edition||"naranja";
   renderLayout();
 }));
 
@@ -966,9 +1073,10 @@ document.querySelectorAll("#bgChips .chip").forEach(b=>b.addEventListener("click
 // reset
 on("reset","click",()=>{
   Object.assign(state,{nombre:"",apellido:"",cargo:"",datos:"",coleccion:"",stickerno:"",country:"AR",
+    titulo:"",subtitulo:"",area:"",
     photo:null,photoCut:null,cutW:0,cutH:0,imgW:0,imgH:0,posX:50,posY:state.layout==="a"?35:30,zoom:1,mode:"normal",
     removeBg:false});
-  ["nombre","apellido","cargo","datos","coleccion","stickerno"].forEach(id=>document.getElementById(id).value="");
+  ["nombre","apellido","cargo","datos","coleccion","stickerno","titulo","subtitulo","area"].forEach(id=>{const el=document.getElementById(id); if(el) el.value="";});
   sel.value="AR";
   document.getElementById("thumb").style.display="none";
   document.getElementById("dropEmpty").style.display="block";
